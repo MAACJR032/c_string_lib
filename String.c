@@ -1,6 +1,9 @@
+#pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <ctype.h>
 
 typedef struct string
@@ -17,6 +20,11 @@ typedef enum {
     STRING_OUT_OF_RANGE     = -4
 } string_status_t;
 
+/*
+ * Internal function
+ *
+ * allocs the string and addign it's size and capacity to `size`
+ */
 string* _string_alloc(size_t size)
 {
     string *s = (string *) malloc(sizeof(string));
@@ -37,6 +45,11 @@ string* _string_alloc(size_t size)
     return s;
 }
 
+/*
+ * Internal function
+ *
+ * reallocs the string but do not change the string's capacity and size
+ */
 string_status_t _string_realloc(string *s, size_t size)
 {
     char *tmp = (char *) realloc(s->str, size + 1);
@@ -50,28 +63,11 @@ string_status_t _string_realloc(string *s, size_t size)
 }
 
 /* 
+ * Creates a new string and assigns it's content to str
  * Returns a string with capacity and size of str size - 1 (for the null terminator)
  */
 string* new_string(const char *str)
 {
-    // string *s = (string *) malloc(sizeof(string));
-    // if (!s)
-    //     return NULL;
-
-    // size_t size = strlen(str);
-
-    // s->size = size;
-    // s->capacity = size;
-
-    // s->str = NULL;
-    // s->str = (char *) malloc(size + 1);
-    
-    // if (!s->str)
-    // {
-    //     free(s);
-    //     return NULL;
-    // }
-
     size_t size = strlen(str);
     string *s = _string_alloc(size);
     if (!s)
@@ -84,26 +80,11 @@ string* new_string(const char *str)
 }
 
 /* 
+ * Creates a new string and assigns it's content to str
  * Returns a string with capacity and size of str size - 1 (for the null terminator)
  */
 string* new_string_s(const string *str)
 {
-    // string *s = (string *) malloc(sizeof(string));
-    // if (!s)
-    //     return NULL;
-
-    // s->size = str->size;
-    // s->capacity = str->size;
-
-    // s->str = NULL;
-    // s->str = (char *) malloc(str->size + 1);
-    
-    // if (!s->str)
-    // {
-    //     free(s);
-    //     return NULL;
-    // }
-
     string *s = _string_alloc(str->size);
     if (!s)
         return NULL;
@@ -115,9 +96,11 @@ string* new_string_s(const string *str)
 }
 
 /* 
- * Releases the memory of the string s
- * Returns STRING_NULL_ARG_ERROR if the argument is NULL
- * Returns STRING_SUCCESS if there was no error
+ * Releases the memory of the string `s`
+ *
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - STRING_SUCCESS if there was no error
  */
 string_status_t string_free(string **s)
 {
@@ -134,11 +117,61 @@ string_status_t string_free(string **s)
 }
 
 /*
+ * Resizes the string to the specified size.
+ * If the size is greater, the new characters are uninitialized.
+ * If the size is smaller, the string is truncated.
+ * 
+ * Parameters:
+ * - `s`: The string to be resized
+ * - `size`: The new size of the string
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - STRING_ALLOCATION_ERROR if there was an error allocating memory
+ * - STRING_SUCCESS if there was no error
+ */
+string_status_t string_resize(string *s, size_t size)
+{
+    if (!s || !s->str)
+        return STRING_NULL_ARG_ERROR;
+
+    if (size == s->size)
+        return STRING_SUCCESS;
+
+    char *tmp = (char *) malloc(sizeof(char) * (size + 1));
+    if (!tmp)
+        return STRING_ALLOCATION_ERROR;
+
+    if (size < s->size)
+    {
+        memcpy(tmp, s->str, size);
+        s->size = size;
+    }
+    else if (size > s->size)
+        memcpy(tmp, s->str, s->size);
+
+    tmp[size] = '\0';
+
+    free(s->str);
+    s->str = tmp;
+    tmp = NULL;
+
+    s->capacity = size;
+
+    return STRING_SUCCESS;
+}
+
+/*
  * Appends the src string to the end of dest.
  * The function handles any necessary memory allocation.
- * Returns STRING_NULL_ARG_ERROR if any argument is NULL
- * Returns STRING_ALLOCATION_ERROR if there was an error reallocating
- * Returns STRING_SUCCESS if there was no error
+ * Parameters:
+ * - `dest`: The string that will be appended by src
+ * - `src`: The string whose content will be appended to dest
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - STRING_ALLOCATION_ERROR if there was an error reallocating
+ * - STRING_SUCCESS if there was no error
  */
 string_status_t string_append(string *dest, const char *src)
 {
@@ -149,12 +182,6 @@ string_status_t string_append(string *dest, const char *src)
 
     if (dest->capacity - dest->size < src_size)
     {
-        // char *tmp = (char *) realloc(dest->str, dest->capacity + src_size + 1);
-
-        // if (!tmp)
-        //     return STRING_ALLOCATION_ERROR;
-        
-        // dest->str = tmp;
         if (_string_realloc(dest, dest->capacity + src_size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
         dest->capacity += src_size;
@@ -171,9 +198,14 @@ string_status_t string_append(string *dest, const char *src)
 /*
  * Appends the src string to the end of dest.
  * The function handles any necessary memory allocation.
- * Returns STRING_NULL_ARG_ERROR if any argument is NULL
- * Returns STRING_ALLOCATION_ERROR if there was an error reallocating
- * Returns STRING_SUCCESS if there was no error
+ * Parameters:
+ * - `dest`: The string that will be appended by src
+ * - `src`: The string whose content will be appended to dest
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - STRING_ALLOCATION_ERROR if there was an error reallocating
+ * - STRING_SUCCESS if there was no error
  */
 string_status_t string_append_s(string *dest, const string *src)
 {
@@ -182,13 +214,6 @@ string_status_t string_append_s(string *dest, const string *src)
 
     if (dest->capacity - dest->size < src->size)
     {
-        // char *tmp = (char *) realloc(dest->str, dest->capacity + src->size + 1);
-
-        // if (!tmp)
-        //     return STRING_ALLOCATION_ERROR;
-
-        // dest->str = tmp;
-
         if (_string_realloc(dest, dest->capacity + src->size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
         dest->capacity += src->size;
@@ -205,9 +230,15 @@ string_status_t string_append_s(string *dest, const string *src)
 /* 
  * Assigns the src string to dest.
  * The function handles any necessary memory allocation.
- * Returns STRING_NULL_ARG_ERROR if any argument is NULL
- * Returns STRING_ALLOCATION_ERROR if there was an error reallocating
- * Returns STRING_SUCCESS if there was no error
+ * 
+ * Parameters:
+ * - `dest`: The string that will be assigned by src
+ * - `src`: The string whose content will be assigned to dest
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - STRING_ALLOCATION_ERROR if there was an error reallocating
+ * - STRING_SUCCESS if there was no error
  */
 string_status_t string_assign_s(string *dest, const string *src)
 {
@@ -216,13 +247,6 @@ string_status_t string_assign_s(string *dest, const string *src)
 
     if (dest->capacity < src->size)
     {
-        // char *tmp = (char *) realloc(dest->str, src->size + 1);
-
-        // if (!tmp)
-        //     return STRING_ALLOCATION_ERROR;
-
-        // dest->str = tmp;
-
         if (_string_realloc(dest, src->size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
         dest->capacity = src->size;
@@ -239,9 +263,15 @@ string_status_t string_assign_s(string *dest, const string *src)
 /* 
  * Assigns the src string to dest.
  * The function handles any necessary memory allocation.
- * Returns STRING_NULL_ARG_ERROR if any argument is NULL
- * Returns STRING_ALLOCATION_ERROR if there was an error reallocating
- * Returns STRING_SUCCESS if there was no error
+ * 
+ * Parameters:
+ * - `dest`: The string that will be assigned by src
+ * - `src`: The string whose content will be assigned to dest
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - STRING_ALLOCATION_ERROR if there was an error reallocating
+ * - STRING_SUCCESS if there was no error
  */
 string_status_t string_assign(string *dest, const char *src)
 {
@@ -252,13 +282,6 @@ string_status_t string_assign(string *dest, const char *src)
 
     if (dest->capacity < src_size)
     {
-        // char *tmp = (char *) realloc(dest->str, src_size + 1);
-
-        // if (!tmp)
-        //     return STRING_ALLOCATION_ERROR;
-
-        // dest->str = tmp;
-
         if (_string_realloc(dest, src_size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
         dest->capacity = src_size;
@@ -272,11 +295,52 @@ string_status_t string_assign(string *dest, const char *src)
     return STRING_SUCCESS;
 }
 
+string_status_t string_insert(string *dest, const char *src, size_t pos)
+{
+    if (!dest || !dest->str || !src)
+        return STRING_NULL_ARG_ERROR;
+    
+    if (pos > dest->size)
+        return STRING_OUT_OF_RANGE;
+
+    size_t src_size = strlen(src);
+    if (dest->capacity - dest->size < src_size)
+    {
+        string_status_t status = string_resize(dest, src_size);
+        if (status != STRING_SUCCESS)
+            return status;
+    }
+
+    string *tmp = new_string("teste");
+    // tmp->capacity = pos;
+    tmp->size = pos;
+    memcpy(tmp->str, dest->str, pos);
+    
+
+    printf("%s\n", tmp->str);
+    string_free(&tmp);
+
+    // for (size_t i = dest->size; i > pos; i--)
+    // {
+        // dest->str[i] = 
+    // }
+    
+    
+}
+
+string_status_t string_insert_s(string *dest, const string *src, size_t pos)
+{
+    if (!dest || !dest->str || !src || !src->str)
+        return STRING_NULL_ARG_ERROR;
+}
+
 /*
  * Erases the content of the string
  * but the capacity is still the same
- * Returns STRING_NULL_ARG_ERROR if the argument is NULL
- * Returns STRING_SUCCESS if there was no error
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - STRING_SUCCESS if there was no error
  */
 string_status_t string_clear(string *s)
 {
@@ -292,13 +356,12 @@ string_status_t string_clear(string *s)
 /*
  * Compares the content of str1 with str2.
  * Returns:
- *   0  if both strings are equal
- *   1  if str1 is lexicographically greater than str2
- *  -1  if str1 is lexicographically less than str2
- * 
- * Returns STRING_NULL_ARG_ERROR if any argument is NULL
+ * -  0  if both strings are equal
+ * -  1  if str1 is lexicographically greater than str2
+ * - -1  if str1 is lexicographically less than str2
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
  */
-int string_compare(string *str1, const char *str2)
+int string_compare(const string *str1, const char *str2)
 {
     if (!str1 || !str1->str || !str2)
         return STRING_NULL_ARG_ERROR;
@@ -333,13 +396,12 @@ int string_compare(string *str1, const char *str2)
 /*
  * Compares the content of str1 with str2.
  * Returns:
- *   0  if both strings are equal
- *   1  if str1 is lexicographically greater than str2
- *  -1  if str1 is lexicographically less than str2
- * 
- * Returns STRING_NULL_ARG_ERROR if any argument is NULL
+ * -  0  if both strings are equal
+ * -  1  if str1 is lexicographically greater than str2
+ * - -1  if str1 is lexicographically less than str2
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
  */
-int string_compare_s(string *str1, string *str2)
+int string_compare_s(const string *str1, const string *str2)
 {
     if (!str1 || !str1->str || !str2 || !str2->str)
         return STRING_NULL_ARG_ERROR;
@@ -371,48 +433,13 @@ int string_compare_s(string *str1, string *str2)
 }
 
 /*
- * Resizes the string to the specified size.
- * If the size is greater, the new characters are uninitialized.
- * If the size is smaller, the string is truncated.
- * Returns STRING_NULL_ARG_ERROR if the argument is NULL
- * Returns STRING_ALLOCATION_ERROR if there was an error allocating memory
- * Returns STRING_SUCCESS if there was no error
- */
-string_status_t string_resize(string *s, size_t size)
-{
-    if (!s || !s->str)
-        return STRING_NULL_ARG_ERROR;
-
-    if (size == s->size)
-        return STRING_SUCCESS;
-
-    char *tmp = (char *) malloc(sizeof(char) * (size + 1));
-    if (!tmp)
-        return STRING_ALLOCATION_ERROR;
-
-    if (size < s->size)
-    {
-        memcpy(tmp, s->str, size);
-        s->size = size;
-    }
-    else if (size > s->size)
-        memcpy(tmp, s->str, s->size);
-
-    tmp[size] = '\0';
-
-    free(s->str);
-    s->str = tmp;
-    tmp = NULL;
-
-    s->capacity = size;
-
-    return STRING_SUCCESS;
-}
-
-/*
  * Converts all characters in the string to lowercase.
- * Returns STRING_NULL_ARG_ERROR if the argument is NULL
- * Returns STRING_SUCCESS if there was no error
+ * Parameter:
+ * `s`: The string that will be lowercased
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - STRING_SUCCESS if there was no error
  */
 string_status_t string_lower(string *s)
 {
@@ -427,8 +454,12 @@ string_status_t string_lower(string *s)
 
 /*
  * Converts all characters in the string to uppercase.
- * Returns STRING_NULL_ARG_ERROR if the argument is NULL
- * Returns STRING_SUCCESS if there was no error
+ * Parameter:
+ * `s`: The string that will be uppercased
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - STRING_SUCCESS if there was no error
  */
 string_status_t string_upper(string *s)
 {
@@ -441,78 +472,237 @@ string_status_t string_upper(string *s)
     return STRING_SUCCESS;
 }
 
-string_status_t string_substr(string *dest, string *src, size_t start, size_t end)
+/*
+ * Assigns the substring from start to end of src to dest.
+ *
+ * Parameters:
+ * - `dest`: the string that will that will be assigned by the sub string
+ * - `src`: the string that contains the sub string
+ * - `start`: the starting position of the sub string (inclusive)
+ * - `end`: the ending position of the sub string (exclusive)
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - STRING_OUT_OF_RANGE if start or/and end are out of the string range
+ * Ex: string size is 10, if end is 12, it is out of range
+ * - STRING_ALLOCATION_ERROR if there was an error allocating memory
+ * - STRING_SUCCESS if there was no error
+ */
+string_status_t string_substr(string *dest, const string *src, size_t start, size_t end)
 {
     if (!src || !src->str)
         return STRING_NULL_ARG_ERROR;
     
     if (start >= src->size || end > src->size || start > end)
         return STRING_OUT_OF_RANGE;
-    
-    /* FAZER ALOCAÇÂO OU OQ QUER QUE SEJA SE DEST FOR > QUE SRC */
+
     size_t substr_size = end - start;
-    printf("size: %zu\n", substr_size);
     if (dest->capacity < substr_size)
     {
-        free(dest->str); 
-        printf("malloc\n");
-        dest = _string_alloc(substr_size);
-
-        if (dest == NULL)
+        if (string_resize(dest, substr_size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
         
         dest->capacity = substr_size;
-        dest->size = substr_size; 
     }
 
     for (size_t i = 0, j = start; j < end; i++, j++)
-    {
         dest->str[i] = src->str[j];
-        // printf("%c, %zu\n", dest.str, j);
-    }
 
+    dest->size = substr_size;
     dest->str[dest->size] = '\0';
 
     return STRING_SUCCESS;
 }
 
-int main()
+/* 
+ * Splits the source string `src` into an array of strings using the specified delimiter.
+ * 
+ * Parameters:
+ * - `src`: The source string to split.
+ * - `delimiter`: The character used to split the string.
+ * - `count`: Pointer to a size_t variable to store the number of substrings created.
+ * - `status`: Pointer to store the result status of the operation.
+ *
+ * Returns:
+ * - An array of strings (`string**`) representing the split substrings.
+ * - Sets `status` to:
+ *   - STRING_NULL_ARG_ERROR if `src` or its internal string is NULL.
+ *   - STRING_ALLOCATION_ERROR if memory allocation fails.
+ *   - STRING_SUCCESS if the operation succeeds.
+ *
+ * Notes:
+ * - If the delimiter appears consecutively, empty substrings are ignored.
+ * - Memory for the array of substrings and each substring must be freed by the caller.
+ */
+string** string_split(const string *src, const char delimiter, size_t *count, string_status_t *status)
 {
-    string *s = new_string("teste");
-    string *s2 = new_string("adFAGDSBF");
-    string_substr(s2, s, 0, 3);
-    printf("%zu %zu %s\n", s->size, s->capacity, s->str);
-    printf("%zu %zu %s\n", s2->size, s2->capacity, s2->str);
+    if (!src || !src->str)
+    {
+        *status = STRING_NULL_ARG_ERROR;
+        return NULL;
+    }
+
+    *count = 0;
+
+    size_t ocurrences = 0;
+    for (size_t i = 0; i < src->size; i++)
+    {
+        if (src->str[i] == delimiter || src->str[i] == '\0')
+        {
+            if (i == 0 || src->str[i-1] == delimiter)
+                continue;
+
+            ocurrences++;
+        }
+    }
+
+    if (src->size > 0 && src->str[src->size - 1] != delimiter)
+        ocurrences++;
+
+    string **s = (string **) malloc(sizeof(string *) * ocurrences);
+    if (!s)
+    {
+        *status = STRING_ALLOCATION_ERROR;
+        return NULL;
+    }
+
+    size_t start = 0, split_index = 0;
+
+    for (size_t i = 0; i <= src->size; i++)
+    {
+        if (src->str[i] == delimiter || src->str[i] == '\0')
+        {
+            if (start == i)
+            {
+                start = i + 1;
+                continue;
+            }
+
+            size_t size = i - start;
+            if (size == 0)
+                continue;
+
+            string *substr = _string_alloc(size);
+            if (!substr)
+            {
+                // Clean up already allocated strings
+                for (size_t j = 0; j < split_index; j++)
+                    string_free(&s[j]);
+                free(s);
+
+                *status = STRING_ALLOCATION_ERROR;
+                return NULL;
+            }
+
+            memcpy(substr->str, src->str + start, size);
+            substr->str[size] = '\0';
+            substr->size = size;
+
+            s[split_index++] = substr;
+            start = i + 1;
+        }
+    }
+    
+    *count = split_index;
+    *status = STRING_SUCCESS;
+    return s;
 }
 
 /*
+ * Joins an array of strings into a single string, inserting a delimiter between each.
+ *
+ * Parameters:
+ * - `strings`: Array of strings (`string**`) to join.
+ * - `delimiter`: The character to insert between each substring.
+ * - `num_strings`: Number of strings in the `strings` array.
+ * - `status`: Pointer to store the result status of the operation.
+ *
+ * Returns:
+ * - A new string containing the concatenated result with delimiters.
+ * - Sets `status` to:
+ *   - STRING_NULL_ARG_ERROR if `strings` or its contents are NULL.
+ *   - STRING_ALLOCATION_ERROR if memory allocation fails.
+ *   - STRING_SUCCESS if the operation succeeds.
+ *
+ * Notes:
+ * - The memory for the returned string must be freed by the caller.
+ */
+string* string_join(string **strings, char delimiter, size_t num_strings, string_status_t *status)
+{
+    if (!strings)
+    {
+        *status = STRING_NULL_ARG_ERROR;
+        return NULL;
+    }
 
-Busca de Padrão (string_find):
-Encontra a posição da primeira ocorrência de uma substring:
-int string_find(const string *s, const char *pattern);
+    size_t size = 0;
 
-Inserção de Substring (string_insert):
-Insere uma string em uma posição específica:
-string_status_t string_insert(string *dest, size_t pos, const char *src);
+    for (size_t i = 0; i < num_strings; i++)
+        size += strings[i]->size + 1; // +1 for the delimiter
 
-Trim (string_trim):
-Remove espaços em branco do início e fim da string:
-string_status_t string_trim(string *s);
+    size--; // last char can't be a delimiter
+    
+    string *s = _string_alloc(size);
+    if (!s)
+    {
+        *status = STRING_ALLOCATION_ERROR;
+        return NULL;
+    }
 
-Replace (string_replace):
-Substitui todas as ocorrências de um caractere ou substring:
-string_status_t string_replace(string *s, const char *old, const char *new);
+    size_t accumulator = 0;
+    for (size_t i = 0; i < num_strings; i++)
+    {
+        if (!strings[i]->str)
+        {
+            *status = STRING_NULL_ARG_ERROR;
+            string_free(&s);
+            return NULL;
+        }
 
-Split (string_split):
-Divide a string com base em um delimitador e retorna um array de strings:
-string** string_split(const string *s, char delimiter, size_t *count);
+        for (size_t j = 0; j < strings[i]->size; j++)
+        {
+            s->str[accumulator] = strings[i]->str[j];
+            accumulator++;
+        }
+        
+        if (i != num_strings - 1)
+        {
+            s->str[accumulator] = delimiter;        
+            accumulator++;
+        }
+    }
 
-Join (string_join):
-Concatena um array de strings com um delimitador:
-string* string_join(string **strings, size_t count, char delimiter);
+    s->size = accumulator;
+    s->str[s->size] = '\0';
+    *status = STRING_SUCCESS;
+    return s;    
+}
 
-Reverse (string_reverse):
-Inverte o conteúdo da string:
-string_status_t string_reverse(string *s);
+/*
+ * Reverses the characters in the string `s` in place.
+ * 
+ * Parameters:
+ * - `s`: The string to reverse.
+ *
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if the string is NULL or its internal buffer is NULL.
+ * - STRING_SUCCESS if the operation succeeds.
+ */
+string_status_t string_reverse(string *s)
+{
+    if (!s || !s->str)
+        return STRING_NULL_ARG_ERROR;
 
-*/
+    int i = 0, j = s->size - 1;
+    while (i < j)
+    {
+        char tmp = s->str[i];
+        s->str[i] = s->str[j];
+        s->str[j] = tmp;
+
+        i++;
+        j--;
+    }
+
+    return STRING_SUCCESS;
+}

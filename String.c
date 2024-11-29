@@ -120,7 +120,8 @@ string* new_string(const char *str, size_t capacity)
  * Returns:
  *   - A pointer to a newly allocated `string` object containing the copied string.
  *   The `size` field of the string will be set to the length of `str`,
- *   - If memory allocation fails, or if `str` is NULL, the function returns NULL.
+ *   - If memory allocation fails the function returns NULL.
+ *   - if `str` or it's content is NULL, the function returns NULL.
  */
 string* new_string_s(const string *str, size_t capacity)
 {
@@ -148,7 +149,7 @@ string* new_string_s(const string *str, size_t capacity)
  * Releases the memory of the string `s`
  *
  * Returns:
- * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if `s` or it's content is NULL
  * - STRING_SUCCESS if there was no error
  */
 string_status_t string_free(string **s)
@@ -175,7 +176,7 @@ string_status_t string_free(string **s)
  * - `size`: The new size of the string
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if the argument is NULL
  * - STRING_ALLOCATION_ERROR if there was an error allocating memory
  * - STRING_SUCCESS if there was no error
  */
@@ -218,7 +219,7 @@ string_status_t string_resize(string *s, size_t size)
  * - `src`: The string whose content will be appended to dest
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_ALLOCATION_ERROR if there was an error reallocating
  * - STRING_SUCCESS if there was no error
  */
@@ -250,7 +251,7 @@ string_status_t string_append(string *dest, const char *src)
  * - `src`: The string whose content will be appended to dest
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_ALLOCATION_ERROR if there was an error reallocating
  * - STRING_SUCCESS if there was no error
  */
@@ -283,7 +284,7 @@ string_status_t string_append_s(string *dest, const string *src)
  * - `src`: The string whose content will be assigned to dest
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_ALLOCATION_ERROR if there was an error reallocating
  * - STRING_SUCCESS if there was no error
  */
@@ -313,7 +314,7 @@ string_status_t string_assign_s(string *dest, const string *src)
  * - `src`: The string whose content will be assigned to dest
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_ALLOCATION_ERROR if there was an error reallocating
  * - STRING_SUCCESS if there was no error
  */
@@ -345,7 +346,7 @@ string_status_t string_assign(string *dest, const char *src)
  * - `pos`: The index in the destination string where the source string will be inserted.
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_OUT_OF_RANGE if `pos` is bigger than `dest`'s size
  * - STRING_ALLOCATION_ERROR if there was an error reallocating
  * - STRING_SUCCESS if there was no error
@@ -394,7 +395,7 @@ string_status_t string_insert(string *dest, const char *src, size_t pos)
  * - `pos`: The index in the destination string where the source string will be inserted.
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_OUT_OF_RANGE if `pos` is bigger than `dest`'s size
  * - STRING_ALLOCATION_ERROR if there was an error reallocating
  * - STRING_SUCCESS if there was no error
@@ -438,7 +439,7 @@ string_status_t string_insert_s(string *dest, const string *src, size_t pos)
  * but the capacity is still the same
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if the argument is NULL
  * - STRING_SUCCESS if there was no error
  */
 string_status_t string_clear(string *s)
@@ -454,11 +455,12 @@ string_status_t string_clear(string *s)
 
 /*
  * Compares the content of str1 with str2.
+ *
  * Returns:
  * -  0  if both strings are equal
  * -  1  if str1 is lexicographically greater than str2
  * - -1  if str1 is lexicographically less than str2
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  */
 int string_compare(const string *str1, const char *str2)
 {
@@ -470,18 +472,16 @@ int string_compare(const string *str1, const char *str2)
 
     unsigned char c1, c2;
 
-    char *str1_ptr = str1->str;
-	while (min)
+    const char *str1_ptr = str1->str;
+    const char *str2_ptr = str2;
+
+	while (min--)
     {
-		c1 = *str1_ptr++;
-		c2 = *str2++;
+		c1 = (unsigned char) *str1_ptr++;
+		c2 = (unsigned char) *str2++;
 
 		if (c1 != c2)
 			return c1 < c2 ? -1 : 1;
-		if (!c1)
-			break;
-
-		min--;
 	}
 
     if (str1->size > size2)
@@ -494,11 +494,12 @@ int string_compare(const string *str1, const char *str2)
 
 /*
  * Compares the content of str1 with str2.
+ *
  * Returns:
  * -  0  if both strings are equal
  * -  1  if str1 is lexicographically greater than str2
  * - -1  if str1 is lexicographically less than str2
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  */
 int string_compare_s(const string *str1, const string *str2)
 {
@@ -509,18 +510,106 @@ int string_compare_s(const string *str1, const string *str2)
 
     unsigned char c1, c2;
 
-    char *str1_ptr = str1->str, *str2_ptr = str2->str;
-	while (min)
+    const char *str1_ptr = str1->str;
+    const char *str2_ptr = str2->str;
+
+	while (min--)
     {
-		c1 = *str1_ptr++;
-		c2 = *str2_ptr++;
+		c1 = (unsigned char) *str1_ptr++;
+		c2 = (unsigned char) *str2_ptr++;
 
 		if (c1 != c2)
 			return c1 < c2 ? -1 : 1;
-		if (!c1)
-			break;
+	}
 
-		min--;
+    if (str1->size > str2->size)
+        return 1;
+    else if (str1->size < str2->size)
+        return -1;
+    
+	return 0;
+}
+
+/*
+ * Compares the content of `str1` with `str2` up to `size`.
+ * If `size` is bigger than `str1` and `str2` sizes,
+ * it will be adjuted to be the minimum of them both
+ * 
+ * Returns:
+ * -  0  if both strings are equal
+ * -  1  if `str1` is lexicographically greater than `str2`
+ * - -1  if `str1` is lexicographically less than `str2`
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
+ */
+int string_compare_buffer(const string *str1, const char *str2, size_t size)
+{
+    if (!str1 || !str1->str || !str2)
+        return STRING_NULL_ARG_ERROR;
+    
+    size_t str2_size = strlen(str2);
+
+    if (size > str1->size)
+        size = str1->size;
+
+    if (size > str2_size)
+        size = str2_size;
+
+    unsigned char c1, c2;
+
+    const char *str1_ptr = str1->str;
+    const char *str2_ptr = str2;
+
+	while (size--)
+    {
+		c1 = (unsigned char) *str1_ptr++;
+		c2 = (unsigned char) *str2++;
+
+		if (c1 != c2)
+			return c1 < c2 ? -1 : 1;
+	}
+
+    if (str1->size > str2_size)
+        return 1;
+    else if (str1->size < str2_size)
+        return -1;
+    
+	return 0;
+}
+
+/*
+ * Compares the content of `str1` with `str2` up to `size`.
+ * If `size` is bigger than `str1` and `str2` sizes,
+ * it will be adjuted to be the minimum of them both
+ * 
+ * Returns:
+ * -  0  if both strings are equal
+ * -  1  if `str1` is lexicographically greater than `str2`
+ * - -1  if `str1` is lexicographically less than `str2`
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
+ */
+int string_compare_buffer_s(const string *str1, const string *str2, size_t size)
+{
+    if (!str1 || !str1->str || !str2)
+        return STRING_NULL_ARG_ERROR;
+
+    if (size > str1->size)
+        size = str1->size;
+
+    if (size > str2->size)
+        size = str2->size;
+
+    unsigned char c1, c2;
+
+    const char *str1_ptr = str1->str;
+    const char *str2_ptr = str2->str;
+    
+	while (size--)
+    {
+		c1 = (unsigned char) *str1_ptr++;
+		c2 = (unsigned char) *str2_ptr++;
+
+		if (c1 != c2)
+			return c1 < c2 ? -1 : 1;
 	}
 
     if (str1->size > str2->size)
@@ -537,7 +626,7 @@ int string_compare_s(const string *str1, const string *str2)
  * `s`: The string that will be lowercased
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if the argument is NULL
  * - STRING_SUCCESS if there was no error
  */
 string_status_t string_lower(string *s)
@@ -557,7 +646,7 @@ string_status_t string_lower(string *s)
  * `s`: The string that will be uppercased
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if the argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if the argument is NULL
  * - STRING_SUCCESS if there was no error
  */
 string_status_t string_upper(string *s)
@@ -581,7 +670,7 @@ string_status_t string_upper(string *s)
  * - `end`: the ending position of the sub string (exclusive)
  * 
  * Returns:
- * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_OUT_OF_RANGE if start or/and end are out of the string range
  * Ex: string size is 10, if end is 12, it is out of range
  * - STRING_ALLOCATION_ERROR if there was an error allocating memory
@@ -625,7 +714,7 @@ string_status_t string_substr(string *dest, const string *src, size_t start, siz
  * Returns:
  * - An array of strings (`string**`) representing the split substrings.
  * - Sets `status` to:
- *   - STRING_NULL_ARG_ERROR if `src` or its internal string is NULL.
+ *   - `STRING_NULL_ARG_ERROR` if `src` or its internal string is NULL.
  *   - STRING_ALLOCATION_ERROR if memory allocation fails.
  *   - STRING_SUCCESS if the operation succeeds.
  *
@@ -719,7 +808,7 @@ string** string_split(const string *src, const char delimiter, size_t *count, st
  * Returns:
  * - A new string containing the concatenated result with delimiters.
  * - Sets `status` to:
- *   - STRING_NULL_ARG_ERROR if `strings` or its contents are NULL.
+ *   - `STRING_NULL_ARG_ERROR` if `strings` or its contents are NULL.
  *   - STRING_ALLOCATION_ERROR if memory allocation fails.
  *   - STRING_SUCCESS if the operation succeeds.
  *
@@ -784,7 +873,7 @@ string* string_join(string **strings, char delimiter, size_t num_strings, string
  * - `s`: The string to reverse.
  *
  * Returns:
- * - STRING_NULL_ARG_ERROR if the string is NULL or its internal buffer is NULL.
+ * - `STRING_NULL_ARG_ERROR` if the string is NULL or it's internal buffer is NULL.
  * - STRING_SUCCESS if the operation succeeds.
  */
 string_status_t string_reverse(string *s)
@@ -804,4 +893,63 @@ string_status_t string_reverse(string *s)
     }
 
     return STRING_SUCCESS;
+}
+
+/*
+ * Finds the first occurrence of `substr` in `s`.
+ *
+ * Parameters:
+ * - `s`: The `string` that will be searched.
+ * - `substr`: The substring that is search for.
+ *
+ * Returns:
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`.
+ * - `-1` if `substr` is not found in `s`.
+ * - The index of the first occurrence of `substr` in `s` if found, or `-1` if `substr` is not found.
+ */
+ssize_t string_find(const string *s, const char *substr)
+{
+    if (!s || !s->str || !substr)
+        return STRING_NULL_ARG_ERROR;
+
+    size_t substr_size = strlen(substr);
+    if (s->size == 0 || substr_size == 0)
+        return -1;
+
+    for (size_t i = 0; i <= s->size - substr_size; i++)
+    {
+        if (strncmp(s->str + i, substr, substr_size) == 0)
+            return i;
+    }
+
+    return -1; // Not found
+}
+
+/*
+ * Finds the first occurrence of `substr` in `s`.
+ *
+ * Parameters:
+ * - `s`: The `string` that will be searched.
+ * - `substr`: The substring that is search for.
+ *
+ * Returns:
+ * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`.
+ * - `-1` if `substr` is not found in `s`.
+ * - The index of the first occurrence of `substr` in `s` if found, or `-1` if `substr` is not found.
+ */
+ssize_t string_find_s(const string *s, const string *substr)
+{
+    if (!s || !s->str || !substr)
+        return STRING_NULL_ARG_ERROR;
+
+    if (s->size == 0 || substr->size == 0)
+        return -1;
+
+    for (size_t i = 0; i <= s->size - substr->size; i++)
+    {
+        if (strncmp(s->str + i, substr, substr->size) == 0)
+            return i;
+    }
+
+    return -1; // Not found
 }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdarg.h>
 #include <ctype.h>
 
 typedef struct string
@@ -25,17 +26,17 @@ typedef enum {
  *
  * allocs the string and addign it's size and capacity to `size`
  */
-string* _string_alloc(size_t size)
+string* _string_alloc(size_t size, size_t capacity)
 {
     string *s = (string *) malloc(sizeof(string));
     if (!s)
         return NULL;
 
     s->size = size;
-    s->capacity = size;
+    s->capacity = capacity;
     s->str = NULL;
 
-    s->str = (char *) malloc(size + 1);
+    s->str = (char *) malloc(capacity + 1);
     if (s->str == NULL)
     {
         free(s);
@@ -48,49 +49,97 @@ string* _string_alloc(size_t size)
 /*
  * Internal function
  *
- * reallocs the string but do not change the string's capacity and size
+ * reallocs the string but do not change the capacity and size
  */
-string_status_t _string_realloc(string *s, size_t size)
+string_status_t _string_realloc(string *s, size_t size, size_t capacity)
 {
-    char *tmp = (char *) realloc(s->str, size + 1);
+    char *tmp = (char *) realloc(s->str, capacity + 1);
 
     if (!tmp)
         return STRING_ALLOCATION_ERROR;
 
     s->str = tmp;
+    s->capacity = capacity;
+    s->size = size;
     
     return STRING_SUCCESS;
 }
 
-/* 
- * Creates a new string and assigns it's content to str
- * Returns a string with capacity and size of str size - 1 (for the null terminator)
+/*
+ * Creates a new string object initialized with the content of the provided string.
+ * This new string must be deallocated with string_free()
+ *
+ * Parameters:
+ *   - str:      string to be copied that will be assigned to the new string. 
+ *   - capacity: The maximum capacity of the new string, including space for the null terminator.
+ *               If the specified capacity is less than the length of `str`, 
+ *               the capacity will be adjusted to match the length of `str`.
+ *               If you don't wish to allocate a larger capacity, it is recommended
+ *               to use `0` for this parameter.
+ *
+ * Returns:
+ *   - A pointer to a newly allocated `string` object containing the copied string.
+ *   The `size` field of the string will be set to the length of `str`,
+ *   - If memory allocation fails, or if `str` is NULL, the function returns NULL.
  */
-string* new_string(const char *str)
+string* new_string(const char *str, size_t capacity)
 {
+    if (!str)
+        return NULL;
+
+    string *s = NULL;
     size_t size = strlen(str);
-    string *s = _string_alloc(size);
+    
+    if (capacity < size)
+        capacity = size;
+
+    s = _string_alloc(size, capacity);
+
     if (!s)
         return NULL;
 
+    s->size = size;
     memcpy(s->str, str, size);
-    s->str[size] = '\0';
+    s->str[s->size] = '\0';
 
     return s;
 }
 
-/* 
- * Creates a new string and assigns it's content to str
- * Returns a string with capacity and size of str size - 1 (for the null terminator)
+/*
+ * Creates a new string object initialized with the content of the provided string.
+ * This new string must be deallocated with string_free()
+ *
+ * Parameters:
+ *   - str:      string to be copied that will be assigned to the new string. 
+ *   - capacity: The maximum capacity of the new string, including space for the null terminator.
+ *               If the specified capacity is less than the length of `str`, 
+ *               the capacity will be adjusted to match the length of `str`.
+ *               If you don't wish to allocate a larger capacity, it is recommended
+ *               to use `0` for this parameter.
+ *
+ * Returns:
+ *   - A pointer to a newly allocated `string` object containing the copied string.
+ *   The `size` field of the string will be set to the length of `str`,
+ *   - If memory allocation fails, or if `str` is NULL, the function returns NULL.
  */
-string* new_string_s(const string *str)
+string* new_string_s(const string *str, size_t capacity)
 {
-    string *s = _string_alloc(str->size);
+    if (!str)
+        return NULL;
+
+    string *s = NULL;
+    
+    if (capacity < str->size)
+        capacity = str->size;
+
+    s = _string_alloc(str->size, capacity);
+
     if (!s)
         return NULL;
 
-    memcpy(s->str, str->str, str->size);
-    s->str[str->size] = '\0';
+    s->size = str->size;
+    memcpy(s->str, str, str->size);
+    s->str[s->size] = '\0';
 
     return s;
 }
@@ -182,14 +231,12 @@ string_status_t string_append(string *dest, const char *src)
 
     if (dest->capacity - dest->size < src_size)
     {
-        if (_string_realloc(dest, dest->capacity + src_size) == STRING_ALLOCATION_ERROR)
+        if (_string_realloc(dest, dest->size + dest->capacity + src_size, dest->capacity + src_size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
         dest->capacity += src_size;
     }
     
     memcpy(dest->str + dest->size, src, src_size);
-
-    dest->size += src_size;
     dest->str[dest->size] = '\0';
     
     return STRING_SUCCESS;
@@ -214,7 +261,7 @@ string_status_t string_append_s(string *dest, const string *src)
 
     if (dest->capacity - dest->size < src->size)
     {
-        if (_string_realloc(dest, dest->capacity + src->size) == STRING_ALLOCATION_ERROR)
+        if (_string_realloc(dest, dest->size + dest->capacity + src->size, dest->capacity + src->size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
         dest->capacity += src->size;
     }
@@ -247,14 +294,11 @@ string_status_t string_assign_s(string *dest, const string *src)
 
     if (dest->capacity < src->size)
     {
-        if (_string_realloc(dest, src->size) == STRING_ALLOCATION_ERROR)
+        if (_string_realloc(dest, src->size, src->size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
-        dest->capacity = src->size;
     }
     
     memcpy(dest->str, src->str, src->size);
-    
-    dest->size = src->size;
     dest->str[dest->size] = '\0';
 
     return STRING_SUCCESS;
@@ -282,19 +326,30 @@ string_status_t string_assign(string *dest, const char *src)
 
     if (dest->capacity < src_size)
     {
-        if (_string_realloc(dest, src_size) == STRING_ALLOCATION_ERROR)
+        if (_string_realloc(dest, src_size, src_size) == STRING_ALLOCATION_ERROR)
             return STRING_ALLOCATION_ERROR;
-        dest->capacity = src_size;
     }
 
     memcpy(dest->str, src, src_size);
-
-    dest->size = src_size;
     dest->str[dest->size] = '\0';
 
     return STRING_SUCCESS;
 }
 
+/*
+ * Inserts `src` into `dest` at the position `pos`.
+ *
+ * Parameters:
+ * - `dest`: the string object where the source string will be inserted. 
+ * - `src`: The string that will be inserted into the destination string.
+ * - `pos`: The index in the destination string where the source string will be inserted.
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - STRING_OUT_OF_RANGE if `pos` is bigger than `dest`'s size
+ * - STRING_ALLOCATION_ERROR if there was an error reallocating
+ * - STRING_SUCCESS if there was no error
+ */
 string_status_t string_insert(string *dest, const char *src, size_t pos)
 {
     if (!dest || !dest->str || !src)
@@ -306,32 +361,76 @@ string_status_t string_insert(string *dest, const char *src, size_t pos)
     size_t src_size = strlen(src);
     if (dest->capacity - dest->size < src_size)
     {
-        string_status_t status = string_resize(dest, src_size);
+        string_status_t status = string_resize(dest, dest->size + src_size);
         if (status != STRING_SUCCESS)
             return status;
     }
 
-    string *tmp = new_string("teste");
-    // tmp->capacity = pos;
-    tmp->size = pos;
-    memcpy(tmp->str, dest->str, pos);
+    size_t tmp_size = dest->size - pos;
     
+    char *tmp = (char *) malloc((tmp_size) * sizeof(char));
+    if (!tmp)
+        return STRING_ALLOCATION_ERROR;
+    
+    memcpy(tmp, dest->str + pos, tmp_size);
+    tmp[tmp_size] = '\0';
 
-    printf("%s\n", tmp->str);
-    string_free(&tmp);
-
-    // for (size_t i = dest->size; i > pos; i--)
-    // {
-        // dest->str[i] = 
-    // }
+    memcpy(dest->str + pos, src, src_size);
+    memcpy(dest->str + pos + src_size, tmp, tmp_size);
     
+    dest->size += src_size;
+    dest->str[dest->size] = '\0';
     
+    free(tmp);
+    return STRING_SUCCESS;
 }
 
+/*
+ * Inserts `src` into `dest` at the position `pos`.
+ *
+ * Parameters:
+ * - `dest`: the string object where the source string will be inserted. 
+ * - `src`: The string that will be inserted into the destination string.
+ * - `pos`: The index in the destination string where the source string will be inserted.
+ * 
+ * Returns:
+ * - STRING_NULL_ARG_ERROR if any argument is NULL
+ * - STRING_OUT_OF_RANGE if `pos` is bigger than `dest`'s size
+ * - STRING_ALLOCATION_ERROR if there was an error reallocating
+ * - STRING_SUCCESS if there was no error
+ */
 string_status_t string_insert_s(string *dest, const string *src, size_t pos)
 {
     if (!dest || !dest->str || !src || !src->str)
         return STRING_NULL_ARG_ERROR;
+    
+    if (pos > dest->size)
+        return STRING_OUT_OF_RANGE;
+
+    if (dest->capacity - dest->size < src->size)
+    {
+        string_status_t status = string_resize(dest, dest->size + src->size);
+        if (status != STRING_SUCCESS)
+            return status;
+    }
+
+    size_t tmp_size = dest->size - pos;
+    
+    char *tmp = (char *) malloc((tmp_size) * sizeof(char));
+    if (!tmp)
+        return STRING_ALLOCATION_ERROR;
+    
+    memcpy(tmp, dest->str + pos, tmp_size);
+    tmp[tmp_size] = '\0';
+
+    memcpy(dest->str + pos, src->str, src->size);
+    memcpy(dest->str + pos + src->size, tmp, tmp_size);
+    
+    dest->size += src->size;
+    dest->str[dest->size] = '\0';
+    
+    free(tmp);
+    return STRING_SUCCESS;
 }
 
 /*
@@ -582,7 +681,7 @@ string** string_split(const string *src, const char delimiter, size_t *count, st
             if (size == 0)
                 continue;
 
-            string *substr = _string_alloc(size);
+            string *substr = _string_alloc(size, size);
             if (!substr)
             {
                 // Clean up already allocated strings
@@ -642,7 +741,7 @@ string* string_join(string **strings, char delimiter, size_t num_strings, string
 
     size--; // last char can't be a delimiter
     
-    string *s = _string_alloc(size);
+    string *s = _string_alloc(size, size);
     if (!s)
     {
         *status = STRING_ALLOCATION_ERROR;

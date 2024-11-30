@@ -1,5 +1,7 @@
 # c_string_lib: A Custom String Library in C
 
+English | [Português](README-PT.md)
+
 c_string_lib is a custom string manipulation library written in C that provides a dynamic and efficient way to handle strings. It abstracts away the complexity of memory allocation and null-termination (`'\0`), allowing users to focus solely on string operations. 
 
 This library includes a wide range of functions for creating, modifying, comparing, and manipulating strings. Functions that typically accept `const char*` also have versions that work seamlessly with the `string` struct.

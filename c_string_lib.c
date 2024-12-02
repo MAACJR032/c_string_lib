@@ -46,6 +46,27 @@ string_status_t _string_realloc(string *s, size_t size, size_t capacity)
     return STRING_SUCCESS;
 }
 
+char* string_to_char(string *s)
+{
+    if (!s || !s->str)
+        return NULL;
+    
+    return s->str;
+}
+
+string* char_to_string(char *s)
+{
+    if (!s)
+        return NULL;
+    
+    size_t size = strlen(s);
+    string *str = _string_alloc(size, size);
+    if (!str)
+        return NULL;
+
+    return str;
+}
+
 /*
  * Creates a new string object initialized with the content of the provided string.
  * This new string must be deallocated with string_free()

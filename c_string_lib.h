@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -17,6 +18,9 @@ typedef enum {
     STRING_ALLOCATION_ERROR = -3,
     STRING_OUT_OF_RANGE     = -4
 } string_status_t;
+
+char* string_to_char(string *s);
+string* char_to_string(char *s);
 
 string* new_string(const char *str, size_t capacity);
 string* new_string_s(const string *str, size_t capacity);

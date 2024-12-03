@@ -987,7 +987,15 @@ ssize_t string_find_s(const string *s, const string *substr)
     return -1; // Not found
 }
 
-
+/*
+ * Creates a new string_iterator for `s`
+ *
+ * Parameters:
+ * - `s`: The `string` to be iterated.
+ *
+ * Returns:
+ * - `iter`, if `s` or it's content it's NULL, `iter`'s current and end are NULL
+ */
 string_iterator new_string_iter(const string *s)
 {
     string_iterator iter = {
@@ -998,6 +1006,15 @@ string_iterator new_string_iter(const string *s)
     return iter;    
 }
 
+/*
+ * Creates a new string_reverse_iterator for `s`
+ *
+ * Parameters:
+ * - `s`: The `string` to be iterated.
+ *
+ * Returns:
+ * - `iter`, if `s` or it's content it's NULL, `iter`'s current and start are NULL
+ */
 string_reverse_iterator new_string_reverse_iter(const string *s)
 {
     string_reverse_iterator iter = {
@@ -1008,6 +1025,16 @@ string_reverse_iterator new_string_reverse_iter(const string *s)
     return iter;
 }
 
+/*
+ * Moves the iterator to the next position if `it` is not on the end of the string
+ * 
+ * Parameters:
+ * - `it`: iterator
+ *
+ * Returns:
+ * - `true`: if `it` is not on the end of the string
+ * - `false`: if `it` is on the end of the string
+ */
 bool string_iter_next(string_iterator *it)
 {
     if (!it || !it->current || !it->end)
@@ -1022,6 +1049,16 @@ bool string_iter_next(string_iterator *it)
     return false;
 }
 
+/*
+ * Moves the iterator to the next position if `it` is not on the start of the string
+ * 
+ * Parameters:
+ * - `it`: reverse iterator
+ *
+ * Returns:
+ * - `true`: if `it` is not on the start of the string
+ * - `false`: if `it` is on the start of the string
+ */
 bool string_reverse_iter_next(string_reverse_iterator *it)
 {
     if (!it || !it->current || !it->start)
@@ -1036,6 +1073,16 @@ bool string_reverse_iter_next(string_reverse_iterator *it)
     return false;
 }
 
+/*
+ * Returns a `char *` to the current position of the iterator
+ * 
+ * Parameters:
+ * - `it`: iterator
+ *
+ * Returns:
+ * - `NULL`: if `it` or it's contents are NULL
+ * - The current position of `it`
+ */
 char* string_get_curr_iter(string_iterator *it)
 {
     if (!it || !it->current || !it->end)
@@ -1044,6 +1091,16 @@ char* string_get_curr_iter(string_iterator *it)
     return it->current;
 }
 
+/*
+ * Returns a `char *` to the current position of the reverse iterator
+ * 
+ * Parameters:
+ * - `it`: reverse iterator
+ *
+ * Returns:
+ * - `NULL`: if `it` or it's contents are NULL
+ * - The current position of `it`
+ */
 char* string_get_curr_reverse_iter(string_reverse_iterator *it)
 {
     if (!it || !it->current || !it->start)

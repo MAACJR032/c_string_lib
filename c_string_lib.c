@@ -169,6 +169,31 @@ string_status_t string_free(string **s)
 }
 
 /*
+ * Reserves the string to the specified size.
+ * If the size is greater, the new characters are uninitialized.
+ * If the size is smaller, the string is truncated.
+ * 
+ * Parameters:
+ * - `s`: The string to be resized
+ * - `size`: The new size of the string
+ * 
+ * Returns:
+ * - `STRING_NULL_ARG_ERROR` if the argument is NULL
+ * - `STRING_ALLOCATION_ERROR` if there was an error allocating memory
+ * - `STRING_SUCCESS` if there was no error
+ */
+string_status_t string_reserve(string *s, size_t capacity)
+{
+    if (!s || !s->str)
+        return STRING_NULL_ARG_ERROR;
+
+    if (s->capacity <= capacity)
+        return STRING_SUCCESS;
+
+    return _string_realloc(s, s->size, capacity);
+}
+
+/*
  * Resizes the string to the specified size.
  * If the size is greater, the new characters are uninitialized.
  * If the size is smaller, the string is truncated.
@@ -179,8 +204,8 @@ string_status_t string_free(string **s)
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if the argument is NULL
- * - STRING_ALLOCATION_ERROR if there was an error allocating memory
- * - STRING_SUCCESS if there was no error
+ * - `STRING_ALLOCATION_ERROR` if there was an error allocating memory
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_resize(string *s, size_t size)
 {
@@ -211,6 +236,14 @@ string_status_t string_resize(string *s, size_t size)
     s->capacity = size;
 
     return STRING_SUCCESS;
+}
+
+string_status_t string_shrink_to_fit(string *s)
+{
+    if (s->size == s->capacity)
+        return STRING_SUCCESS;
+    
+    return _string_realloc(s, s->size, s->size);
 }
 
 /*
@@ -954,4 +987,36 @@ ssize_t string_find_s(const string *s, const string *substr)
     }
 
     return -1; // Not found
+}
+
+
+string_iterator new_string_iter(const string *s)
+{
+    string_iterator iter = {
+        .current = s && s->str ? s->str : NULL,
+        .end = s && s->str ? s->str + s->size : NULL
+    };
+
+    return iter;    
+}
+
+string_reverse_iterator new_string_reverse_iter(const string *s)
+{
+    string_reverse_iterator iter = {
+        .current = s && s->str ? s->str + s->size - 1 : NULL,
+        .start = s && s->str ? s->str: NULL
+    };
+
+    return iter;
+}
+
+string_status_t string_iter_next(string_iterator *it)
+{
+    if (!it || !it->current || !it->end)
+        return STRING_NULL_ARG_ERROR;
+
+    if (it->current < it->end)
+        it->current++;
+    
+    return STRING_SUCCESS;
 }

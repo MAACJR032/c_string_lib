@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 typedef struct string
 {
@@ -26,6 +27,7 @@ string* new_string(const char *str, size_t capacity);
 string* new_string_s(const string *str, size_t capacity);
 string_status_t string_free(string **s);
 
+string_status_t string_reserve(string *s, size_t capacity);
 string_status_t string_resize(string *s, size_t size);
 
 string_status_t string_append(string *dest, const char *src);
@@ -56,3 +58,18 @@ string_status_t string_reverse(string *s);
 
 ssize_t string_find(const string *s, const char *substr);
 ssize_t string_find_s(const string *s, const string *substr);
+
+typedef struct string_iterator
+{
+    const char *current;
+    const char *end;
+} string_iterator;
+
+typedef struct string_reverse_iterator
+{
+    const char *current;
+    const char *start;
+} string_reverse_iterator;
+
+string_iterator new_string_iter(const string *s);
+string_reverse_iterator new_string_reverse_iter(const string *s);

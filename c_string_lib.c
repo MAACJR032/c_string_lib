@@ -1,5 +1,3 @@
-#pragma once
-
 #include "c_string_lib.h"
 
 /*
@@ -1010,13 +1008,46 @@ string_reverse_iterator new_string_reverse_iter(const string *s)
     return iter;
 }
 
-string_status_t string_iter_next(string_iterator *it)
+bool string_iter_next(string_iterator *it)
 {
     if (!it || !it->current || !it->end)
-        return STRING_NULL_ARG_ERROR;
+        return false;
 
     if (it->current < it->end)
+    {
         it->current++;
+        return true;
+    }
     
-    return STRING_SUCCESS;
+    return false;
+}
+
+bool string_reverse_iter_next(string_reverse_iterator *it)
+{
+    if (!it || !it->current || !it->start)
+        return false;
+
+    if (it->current > it->start)
+    {
+        it->current--;
+        return true;
+    }
+    
+    return false;
+}
+
+char* string_get_curr_iter(string_iterator *it)
+{
+    if (!it || !it->current || !it->end)
+        return NULL;
+
+    return it->current;
+}
+
+char* string_get_curr_reverse_iter(string_reverse_iterator *it)
+{
+    if (!it || !it->current || !it->start)
+        return NULL;
+
+    return it->current;
 }

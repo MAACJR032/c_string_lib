@@ -73,3 +73,9 @@ typedef struct string_reverse_iterator
 
 string_iterator new_string_iter(const string *s);
 string_reverse_iterator new_string_reverse_iter(const string *s);
+
+bool string_iter_next(string_iterator *it);
+bool string_reverse_iter_next(string_reverse_iterator *it);
+
+char* string_get_curr_iter(string_iterator *it);
+char* string_get_curr_reverse_iter(string_reverse_iterator *it);

@@ -987,12 +987,50 @@ ssize_t string_find_s(const string *s, const string *substr)
     return -1; // Not found
 }
 
-string_status_t string_print(const string *s)
+/*
+ * Formats a string using a printf-style format specifier and variable arguments.
+ * 
+ * Arguments:
+ * - `dest`: string where the formatted output will be stored.
+ * - `format`: C-style format string specifying how to format the input.
+ * - ...: Variable arguments to match the placeholders in `format`.
+ * 
+ * Returns:
+ * - `STRING_NULL_ARG_ERROR` if `dest`, or it's contens, or `format` is NULL.
+ * - `STRING_ALLOCATION_ERROR` if memory allocation fails or there is an formating error.
+ * - `STRING_SUCCESS` if the operation completes successfully.
+ */
+string_status_t string_format(string *dest, const char *format, ...)
 {
-    if (!s || !s->str)
+    if (!dest || !dest->str || !format)
         return STRING_NULL_ARG_ERROR;
+    
+    va_list args;
+    va_start(args, format);
 
-    printf("%s\n", s->str);
+    int required = vsnprintf(NULL, 0, format, args);
+    if (required < 0)
+    {
+        va_end(args);
+        return STRING_ALLOCATION_ERROR;
+    }
+    va_end(args);
+
+    printf("%d\n", required);
+
+    if (dest->size < required)
+    {
+        string_status_t status = string_reserve(dest, required);
+
+        if (status != STRING_SUCCESS)
+            return status;
+    }
+
+    va_start(args, format);
+    vsnprintf(dest->str, required, format, args);
+    va_end(args);
+
+    dest->str[required] = '\0';
     return STRING_SUCCESS;
 }
 

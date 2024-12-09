@@ -63,7 +63,6 @@ ssize_t string_find_s(const string *s, const string *substr);
 
 string_status_t string_format(string *dest, const char *format, ...);
 
-
 typedef struct string_iterator
 {
     char *current;

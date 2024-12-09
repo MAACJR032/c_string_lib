@@ -1,10 +1,12 @@
 #pragma once
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 typedef struct string
 {
@@ -59,16 +61,21 @@ string_status_t string_reverse(string *s);
 ssize_t string_find(const string *s, const char *substr);
 ssize_t string_find_s(const string *s, const string *substr);
 
+string_status_t string_format(string *dest, const char *format, ...);
+
+
 typedef struct string_iterator
 {
-    const char *current;
+    char *current;
+    const char *start;
     const char *end;
 } string_iterator;
 
 typedef struct string_reverse_iterator
 {
-    const char *current;
+    char *current;
     const char *start;
+    const char *end;
 } string_reverse_iterator;
 
 string_iterator new_string_iter(const string *s);
@@ -79,3 +86,6 @@ bool string_reverse_iter_next(string_reverse_iterator *it);
 
 char* string_get_curr_iter(string_iterator *it);
 char* string_get_curr_reverse_iter(string_reverse_iterator *it);
+
+char string_iter_get_at(string_iterator *it, size_t index, string_status_t *status);
+char string_reverse_iter_get_at(string_reverse_iterator *it, size_t index, string_status_t *status);

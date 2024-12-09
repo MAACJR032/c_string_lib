@@ -150,7 +150,7 @@ string* new_string_s(const string *str, size_t capacity)
  *
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if `s` or it's content is NULL
- * - STRING_SUCCESS if there was no error
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_free(string **s)
 {
@@ -253,8 +253,8 @@ string_status_t string_shrink_to_fit(string *s)
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
- * - STRING_ALLOCATION_ERROR if there was an error reallocating
- * - STRING_SUCCESS if there was no error
+ * - `STRING_ALLOCATION_ERROR if` there was an error reallocating
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_append(string *dest, const char *src)
 {
@@ -285,8 +285,8 @@ string_status_t string_append(string *dest, const char *src)
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
- * - STRING_ALLOCATION_ERROR if there was an error reallocating
- * - STRING_SUCCESS if there was no error
+ * - `STRING_ALLOCATION_ERROR if` there was an error reallocating
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_append_s(string *dest, const string *src)
 {
@@ -318,8 +318,8 @@ string_status_t string_append_s(string *dest, const string *src)
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
- * - STRING_ALLOCATION_ERROR if there was an error reallocating
- * - STRING_SUCCESS if there was no error
+ * - `STRING_ALLOCATION_ERROR if` there was an error reallocating
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_assign_s(string *dest, const string *src)
 {
@@ -348,8 +348,8 @@ string_status_t string_assign_s(string *dest, const string *src)
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
- * - STRING_ALLOCATION_ERROR if there was an error reallocating
- * - STRING_SUCCESS if there was no error
+ * - `STRING_ALLOCATION_ERROR if` there was an error reallocating
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_assign(string *dest, const char *src)
 {
@@ -381,8 +381,8 @@ string_status_t string_assign(string *dest, const char *src)
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_OUT_OF_RANGE if `pos` is bigger than `dest`'s size
- * - STRING_ALLOCATION_ERROR if there was an error reallocating
- * - STRING_SUCCESS if there was no error
+ * - `STRING_ALLOCATION_ERROR if` there was an error reallocating
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_insert(string *dest, const char *src, size_t pos)
 {
@@ -430,8 +430,8 @@ string_status_t string_insert(string *dest, const char *src, size_t pos)
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_OUT_OF_RANGE if `pos` is bigger than `dest`'s size
- * - STRING_ALLOCATION_ERROR if there was an error reallocating
- * - STRING_SUCCESS if there was no error
+ * - `STRING_ALLOCATION_ERROR if` there was an error reallocating
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_insert_s(string *dest, const string *src, size_t pos)
 {
@@ -473,7 +473,7 @@ string_status_t string_insert_s(string *dest, const string *src, size_t pos)
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if the argument is NULL
- * - STRING_SUCCESS if there was no error
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_clear(string *s)
 {
@@ -511,7 +511,7 @@ int string_compare(const string *str1, const char *str2)
 	while (min--)
     {
 		c1 = (unsigned char) *str1_ptr++;
-		c2 = (unsigned char) *str2++;
+		c2 = (unsigned char) *str2_ptr++;
 
 		if (c1 != c2)
 			return c1 < c2 ? -1 : 1;
@@ -519,10 +519,10 @@ int string_compare(const string *str1, const char *str2)
 
     if (str1->size > size2)
         return 1;
-    else if (str1->size < size2)
+    if (str1->size < size2)
         return -1;
     
-	return 0;
+    return 0;
 }
 
 /*
@@ -557,10 +557,10 @@ int string_compare_s(const string *str1, const string *str2)
 
     if (str1->size > str2->size)
         return 1;
-    else if (str1->size < str2->size)
+    if (str1->size < str2->size)
         return -1;
     
-	return 0;
+    return 0;
 }
 
 /*
@@ -595,7 +595,7 @@ int string_compare_buffer(const string *str1, const char *str2, size_t size)
 	while (size--)
     {
 		c1 = (unsigned char) *str1_ptr++;
-		c2 = (unsigned char) *str2++;
+		c2 = (unsigned char) *str2_ptr++;
 
 		if (c1 != c2)
 			return c1 < c2 ? -1 : 1;
@@ -603,10 +603,10 @@ int string_compare_buffer(const string *str1, const char *str2, size_t size)
 
     if (str1->size > str2_size)
         return 1;
-    else if (str1->size < str2_size)
+    if (str1->size < str2_size)
         return -1;
     
-	return 0;
+    return 0;
 }
 
 /*
@@ -647,10 +647,10 @@ int string_compare_buffer_s(const string *str1, const string *str2, size_t size)
 
     if (str1->size > str2->size)
         return 1;
-    else if (str1->size < str2->size)
+    if (str1->size < str2->size)
         return -1;
     
-	return 0;
+    return 0;
 }
 
 /*
@@ -660,7 +660,7 @@ int string_compare_buffer_s(const string *str1, const string *str2, size_t size)
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if the argument is NULL
- * - STRING_SUCCESS if there was no error
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_lower(string *s)
 {
@@ -680,7 +680,7 @@ string_status_t string_lower(string *s)
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if the argument is NULL
- * - STRING_SUCCESS if there was no error
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_upper(string *s)
 {
@@ -706,8 +706,8 @@ string_status_t string_upper(string *s)
  * - `STRING_NULL_ARG_ERROR` if any argument is `NULL`
  * - STRING_OUT_OF_RANGE if start or/and end are out of the string range
  * Ex: string size is 10, if end is 12, it is out of range
- * - STRING_ALLOCATION_ERROR if there was an error allocating memory
- * - STRING_SUCCESS if there was no error
+ * - `STRING_ALLOCATION_ERROR if` there was an error allocating memory
+ * - `STRING_SUCCESS` if there was no error
  */
 string_status_t string_substr(string *dest, const string *src, size_t start, size_t end)
 {
@@ -742,14 +742,14 @@ string_status_t string_substr(string *dest, const string *src, size_t start, siz
  * - `src`: The source string to split.
  * - `delimiter`: The character used to split the string.
  * - `count`: Pointer to a size_t variable to store the number of substrings created.
- * - `status`: Pointer to store the result status of the operation.
+ * - `status`: Pointer to store the result status of the operation (optional).
  *
  * Returns:
  * - An array of strings (`string**`) representing the split substrings.
  * - Sets `status` to:
  *   - `STRING_NULL_ARG_ERROR` if `src` or its internal string is NULL.
- *   - STRING_ALLOCATION_ERROR if memory allocation fails.
- *   - STRING_SUCCESS if the operation succeeds.
+ *   - `STRING_ALLOCATION_ERROR if` memory allocation fails.
+ *   - `STRING_SUCCESS` if the operation succeeds.
  *
  * Notes:
  * - If the delimiter appears consecutively, empty substrings are ignored.
@@ -759,7 +759,7 @@ string** string_split(const string *src, const char delimiter, size_t *count, st
 {
     if (!src || !src->str)
     {
-        *status = STRING_NULL_ARG_ERROR;
+        if (status) *status = STRING_NULL_ARG_ERROR;
         return NULL;
     }
 
@@ -783,7 +783,7 @@ string** string_split(const string *src, const char delimiter, size_t *count, st
     string **s = (string **) malloc(sizeof(string *) * ocurrences);
     if (!s)
     {
-        *status = STRING_ALLOCATION_ERROR;
+        if (status) *status = STRING_ALLOCATION_ERROR;
         return NULL;
     }
 
@@ -811,7 +811,7 @@ string** string_split(const string *src, const char delimiter, size_t *count, st
                     string_free(&s[j]);
                 free(s);
 
-                *status = STRING_ALLOCATION_ERROR;
+                if (status) *status = STRING_ALLOCATION_ERROR;
                 return NULL;
             }
 
@@ -825,7 +825,7 @@ string** string_split(const string *src, const char delimiter, size_t *count, st
     }
     
     *count = split_index;
-    *status = STRING_SUCCESS;
+    if (status) *status = STRING_SUCCESS;
     return s;
 }
 
@@ -836,14 +836,14 @@ string** string_split(const string *src, const char delimiter, size_t *count, st
  * - `strings`: Array of strings (`string**`) to join.
  * - `delimiter`: The character to insert between each substring.
  * - `num_strings`: Number of strings in the `strings` array.
- * - `status`: Pointer to store the result status of the operation.
+ * - `status`: Pointer to store the result status of the operation (optional).
  *
  * Returns:
  * - A new string containing the concatenated result with delimiters.
  * - Sets `status` to:
  *   - `STRING_NULL_ARG_ERROR` if `strings` or its contents are NULL.
- *   - STRING_ALLOCATION_ERROR if memory allocation fails.
- *   - STRING_SUCCESS if the operation succeeds.
+ *   - `STRING_ALLOCATION_ERROR if` memory allocation fails.
+ *   - `STRING_SUCCESS` if the operation succeeds.
  *
  * Notes:
  * - The memory for the returned string must be freed by the caller.
@@ -852,7 +852,7 @@ string* string_join(string **strings, char delimiter, size_t num_strings, string
 {
     if (!strings)
     {
-        *status = STRING_NULL_ARG_ERROR;
+        if (status) *status = STRING_NULL_ARG_ERROR;
         return NULL;
     }
 
@@ -866,7 +866,7 @@ string* string_join(string **strings, char delimiter, size_t num_strings, string
     string *s = _string_alloc(size, size);
     if (!s)
     {
-        *status = STRING_ALLOCATION_ERROR;
+        if (status) *status = STRING_ALLOCATION_ERROR;
         return NULL;
     }
 
@@ -875,7 +875,7 @@ string* string_join(string **strings, char delimiter, size_t num_strings, string
     {
         if (!strings[i]->str)
         {
-            *status = STRING_NULL_ARG_ERROR;
+            if (status) *status = STRING_NULL_ARG_ERROR;
             string_free(&s);
             return NULL;
         }
@@ -895,7 +895,7 @@ string* string_join(string **strings, char delimiter, size_t num_strings, string
 
     s->size = accumulator;
     s->str[s->size] = '\0';
-    *status = STRING_SUCCESS;
+    if (status) *status = STRING_SUCCESS;
     return s;    
 }
 
@@ -907,7 +907,7 @@ string* string_join(string **strings, char delimiter, size_t num_strings, string
  *
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if the string is NULL or it's internal buffer is NULL.
- * - STRING_SUCCESS if the operation succeeds.
+ * - `STRING_SUCCESS` if the operation succeeds.
  */
 string_status_t string_reverse(string *s)
 {
@@ -987,6 +987,15 @@ ssize_t string_find_s(const string *s, const string *substr)
     return -1; // Not found
 }
 
+string_status_t string_print(const string *s)
+{
+    if (!s || !s->str)
+        return STRING_NULL_ARG_ERROR;
+
+    printf("%s\n", s->str);
+    return STRING_SUCCESS;
+}
+
 /*
  * Creates a new string_iterator for `s`
  *
@@ -994,13 +1003,14 @@ ssize_t string_find_s(const string *s, const string *substr)
  * - `s`: The `string` to be iterated.
  *
  * Returns:
- * - `iter`, if `s` or it's content it's NULL, `iter`'s current and end are NULL
+ * - `iter`, if `s` or it's content it's NULL, `iter`'s `current`, `end` and `start` are NULL
  */
 string_iterator new_string_iter(const string *s)
 {
     string_iterator iter = {
         .current = s && s->str ? s->str : NULL,
-        .end = s && s->str ? s->str + s->size : NULL
+        .start = s && s->str ? s->str : NULL,
+        .end = s && s->str ? s->str + s->size: NULL
     };
 
     return iter;    
@@ -1013,17 +1023,42 @@ string_iterator new_string_iter(const string *s)
  * - `s`: The `string` to be iterated.
  *
  * Returns:
- * - `iter`, if `s` or it's content it's NULL, `iter`'s current and start are NULL
+ * - `iter`, if `s` or it's content it's NULL, `iter`'s `current`, `end` and `start` are NULL
  */
 string_reverse_iterator new_string_reverse_iter(const string *s)
 {
     string_reverse_iterator iter = {
         .current = s && s->str ? s->str + s->size - 1 : NULL,
-        .start = s && s->str ? s->str: NULL
+        .start = s && s->str ? s->str : NULL,
+        .end = s && s->str ? s->str + s->size : NULL
     };
 
     return iter;
 }
+
+/*
+    - How to iterate with string_iterator:
+
+    string *s = new_string("Hello, world!", 0);
+    string_iterator it = new_string_iter(&s);
+    
+    for (; it.current >= it.start; string_reverse_iter_next(&it))
+    {
+        printf("%c", *string_get_curr_reverse_iter(&it));
+    }
+
+
+    - How to iterate with string_reverse_iterator:
+
+    string *s = new_string("Hello, world!", 0);
+    string_reverse_iterator it = new_string_reverse_iter(s);
+    
+    for (; it.current < it.end; string_iter_next(&it))
+    {
+        printf("%c", *string_get_curr_iter(&it));
+    }
+
+*/
 
 /*
  * Moves the iterator to the next position if `it` is not on the end of the string
@@ -1040,7 +1075,7 @@ bool string_iter_next(string_iterator *it)
     if (!it || !it->current || !it->end)
         return false;
 
-    if (it->current < it->end)
+    if (it->current != it->end)
     {
         it->current++;
         return true;
@@ -1064,13 +1099,10 @@ bool string_reverse_iter_next(string_reverse_iterator *it)
     if (!it || !it->current || !it->start)
         return false;
 
-    if (it->current > it->start)
-    {
-        it->current--;
-        return true;
-    }
-    
-    return false;
+    if (it->current-- < it->start)
+        return false;
+
+    return true;
 }
 
 /*
@@ -1107,4 +1139,74 @@ char* string_get_curr_reverse_iter(string_reverse_iterator *it)
         return NULL;
 
     return it->current;
+}
+
+/*
+ * Gets the char at a specific position offset from the current `it` position
+ *
+ * Parameters:
+ * - `it`: iterator
+ * - `index`: the offset from the current position
+ * - `status`: Pointer to store the result status of the operation (optional)
+ *
+ * Returns:
+ * - `\0`: if the `it` or its contents are NULL, or the index is out of range
+ * - The char at the specified position
+ *
+ * Possible values for status:
+ * - `STRING_NULL_ARG_ERROR`: if the iterator or its members are NULL
+ * - `STRING_OUT_OF_RANGE`: if the index is out of range
+ * - `STRING_SUCCESS`: if the operation is successful
+ */
+char string_iter_get_at(string_iterator *it, size_t index, string_status_t *status)
+{
+    if (!it || !it->current || !it->end)
+    {
+        if (status) *status = STRING_NULL_ARG_ERROR;
+        return '\0';
+    }
+
+    if (it->current + index >= it->end)
+    {
+        if (status) *status = STRING_OUT_OF_RANGE;
+        return '\0';
+    }
+
+    if (status) *status = STRING_SUCCESS;
+    return *(it->current + index);
+}
+
+/*
+ * Gets the char at a specific position offset from the current `it` position
+ *
+ * Parameters:
+ * - `it`: iterator
+ * - `index`: the offset from the current position
+ * - `status`: Pointer to store the result status of the operation (optional)
+ *
+ * Returns:
+ * - `\0`: if the `it` or its contents are NULL, or the index is out of range
+ * - The char at the specified position
+ *
+ * Possible values for status:
+ * - `STRING_NULL_ARG_ERROR`: if the iterator or its members are NULL
+ * - `STRING_OUT_OF_RANGE`: if the index is out of range
+ * - `STRING_SUCCESS`: if the operation is successful
+ */
+char string_reverse_iter_get_at(string_reverse_iterator *it, size_t index, string_status_t *status)
+{
+    if (!it || !it->current || !it->start)
+    {
+        if (status) *status = STRING_NULL_ARG_ERROR;
+        return '\0';
+    }
+
+    if (it->current - index < it->start)
+    {
+        if (status) *status = STRING_OUT_OF_RANGE;
+        return '\0';
+    }
+
+    if (status) *status = STRING_SUCCESS;
+    return *(it->current - index);
 }

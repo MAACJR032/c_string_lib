@@ -1012,7 +1012,8 @@ string_status_t string_format(string *dest, const char *format, ...)
     if (required < 0)
     {
         va_end(args);
-        return STRING_ALLOCATION_ERROR;
+        
+        return STRING_FORMAT_ERROR;
     }
     va_end(args);
 

@@ -19,7 +19,8 @@ typedef enum {
     STRING_SUCCESS          =  0,
     STRING_NULL_ARG_ERROR   = -2,
     STRING_ALLOCATION_ERROR = -3,
-    STRING_OUT_OF_RANGE     = -4
+    STRING_OUT_OF_RANGE     = -4,
+    STRING_FORMAT_ERROR     = -5
 } string_status_t;
 
 char* string_to_char(string *s);

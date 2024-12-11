@@ -467,6 +467,26 @@ string_status_t string_insert_s(string *dest, const string *src, size_t pos)
     return STRING_SUCCESS;
 }
 
+string_status_t string_pop(string *s)
+{
+    if (!s || !s->str)
+        return STRING_NULL_ARG_ERROR;
+    
+    if (s->size > 0)
+    {
+        s->size--;
+        s->str[s->size] = '\0';
+    }
+
+    return STRING_SUCCESS;
+}
+
+// TODO
+string_status_t string_erase(string *s, size_t start, size_t end)
+{
+
+}
+
 /*
  * Erases the content of the string
  * but the capacity is still the same
@@ -484,6 +504,13 @@ string_status_t string_clear(string *s)
     s->str[0] = '\0';
 
     return STRING_SUCCESS;
+}
+
+bool string_empty(const string *s)
+{
+    if (s && s->str)
+        return s->size == 0;
+    return false;
 }
 
 /*

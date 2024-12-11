@@ -42,7 +42,11 @@ string_status_t string_assign_s(string *dest, const string *src);
 string_status_t string_insert(string *dest, const char *src, size_t pos);
 string_status_t string_insert_s(string *dest, const string *src, size_t pos);
 
+string_status_t string_pop(string *s);
+string_status_t string_erase(string *s, size_t start, size_t end);
+
 string_status_t string_clear(string *s);
+bool string_empty(const string *s);
 
 int string_compare(const string *str1, const char *str2);
 int string_compare_s(const string *str1, const string *str2);

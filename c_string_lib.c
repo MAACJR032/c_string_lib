@@ -44,15 +44,44 @@ string_status_t _string_realloc(string *s, size_t size, size_t capacity)
     return STRING_SUCCESS;
 }
 
-char* string_to_char(string *s)
+/* 
+ * Converts a `string` object to a null-terminated C-style string.
+ * Allocates a new buffer for the C-style string and copies the content.
+ * 
+ * Parameters:
+ * - `s`: The `string` object to convert.
+ * 
+ * Returns:
+ * - A pointer to a newly allocated null-terminated C-style string.
+ * - `NULL` if `s` or it's content are `NULL`.
+ * 
+ * Notes:
+ * - The caller is responsible for freeing the returned string using `free`.
+ */
+char* string_to_char(const string *s)
 {
     if (!s || !s->str)
         return NULL;
     
-    return s->str;
+    char *str = (char *) malloc(sizeof(char) * s->size);
+    memcpy(str, s->str, s->size);
+    str[s->size] = '\0';
+
+    return str;
 }
 
-string* char_to_string(char *s)
+/* 
+ * Converts a null-terminated C-style string to a `string` object.
+ * Allocates a new `string` object and copies the content from the input string.
+ * 
+ * Parameters:
+ * - `s`: The C-style string to convert.
+ * 
+ * Returns:
+ * - A pointer to a newly allocated `string` object.
+ * - `NULL` if `s` is `NULL` or if memory allocation fails.
+ */
+string* char_to_string(const char *s)
 {
     if (!s)
         return NULL;
@@ -70,8 +99,8 @@ string* char_to_string(char *s)
  * This new string must be deallocated with string_free()
  *
  * Parameters:
- *   - str:      string to be copied that will be assigned to the new string. 
- *   - capacity: The maximum capacity of the new string, including space for the null terminator.
+ *   - `str`:      string to be copied that will be assigned to the new string. 
+ *   - `capacity`: The maximum capacity of the new string, including space for the null terminator.
  *               If the specified capacity is less than the length of `str`, 
  *               the capacity will be adjusted to match the length of `str`.
  *               If you don't wish to allocate a larger capacity, it is recommended
@@ -110,8 +139,8 @@ string* new_string(const char *str, size_t capacity)
  * This new string must be deallocated with string_free()
  *
  * Parameters:
- *   - str:      string to be copied that will be assigned to the new string. 
- *   - capacity: The maximum capacity of the new string, including space for the null terminator.
+ *   - `str`:      string to be copied that will be assigned to the new string. 
+ *   - `capacity`: The maximum capacity of the new string, including space for the null terminator.
  *               If the specified capacity is less than the length of `str`, 
  *               the capacity will be adjusted to match the length of `str`.
  *               If you don't wish to allocate a larger capacity, it is recommended
@@ -168,12 +197,11 @@ string_status_t string_free(string **s)
 
 /*
  * Reserves the string to the specified size.
- * If the size is greater, the new characters are uninitialized.
- * If the size is smaller, the string is truncated.
+ * If the size is greater, the new characters are uninitialized, else the capacity stays the same.
  * 
  * Parameters:
- * - `s`: The string to be resized
- * - `size`: The new size of the string
+ * - `s`: The string to be reserved
+ * - `capacity`: The new capcacity of the string
  * 
  * Returns:
  * - `STRING_NULL_ARG_ERROR` if the argument is NULL
@@ -236,8 +264,23 @@ string_status_t string_resize(string *s, size_t size)
     return STRING_SUCCESS;
 }
 
+/* 
+ * Shrinks the capacity of the string to fit its size.
+ * If the size is already equal to the capacity, no action is taken.
+ * 
+ * Parameters:
+ * - `s`: The string to shrink.
+ * 
+ * Returns:
+ * - `STRING_NULL_ARG_ERROR` if `s` or it's contents are `NULL` 
+ * - `STRING_ALLOCATION_ERROR` if there was an error reallocating `s`
+ * - `STRING_SUCCESS` if there was no error
+ */
 string_status_t string_shrink_to_fit(string *s)
 {
+    if (!s || !s->str)
+        return STRING_NULL_ARG_ERROR;
+
     if (s->size == s->capacity)
         return STRING_SUCCESS;
     
@@ -467,6 +510,17 @@ string_status_t string_insert_s(string *dest, const string *src, size_t pos)
     return STRING_SUCCESS;
 }
 
+/* 
+ * Removes the last character from the string.
+ * If the string is empty, no changes are made.
+ * 
+ * Parameters:
+ * - `s`: The string to modify.
+ * 
+ * Returns:
+ * - `STRING_NULL_ARG_ERROR` if `s` or it's contents are `NULL`.
+ * - `STRING_SUCCESS` if there was no error.
+ */
 string_status_t string_pop(string *s)
 {
     if (!s || !s->str)
@@ -481,10 +535,32 @@ string_status_t string_pop(string *s)
     return STRING_SUCCESS;
 }
 
-// TODO
+/* 
+ * Erases a portion of the string between the specified start and end indices.
+ * 
+ * Parameters:
+ * - `s`: The string to modify.
+ * - `start`: The starting index of the portion to erase (inclusive).
+ * - `end`: The ending index of the portion to erase (exclusive).
+ * 
+ * Returns:
+ * - `STRING_NULL_ARG_ERROR` if `s` or it's contents are `NULL`.
+ * - `STRING_OUT_OF_RANGE` if `start` or `end` is out of bounds, or if `start > end`.
+ * - `STRING_SUCCESS` if there was no error.
+ */
 string_status_t string_erase(string *s, size_t start, size_t end)
 {
+    if (!s || !s->str)
+        return STRING_NULL_ARG_ERROR;
+    
+    if (start >= s->size || end > s->size || start > end)
+        return STRING_OUT_OF_RANGE;
 
+    memmove(s->str + start, s->str + end, s->size - end);
+    s->size -= (end - start);
+    s->str[s->size] = '\0';
+
+    return STRING_SUCCESS;
 }
 
 /*
@@ -506,6 +582,10 @@ string_status_t string_clear(string *s)
     return STRING_SUCCESS;
 }
 
+/*
+ * Returns `true` if `s`'s size is `0`
+ * Returns `false` if `s`'s size is greater than `0` or if `s` or it's content are `NULL`
+ */
 bool string_empty(const string *s)
 {
     if (s && s->str)
@@ -753,8 +833,7 @@ string_status_t string_substr(string *dest, const string *src, size_t start, siz
         dest->capacity = substr_size;
     }
 
-    for (size_t i = 0, j = start; j < end; i++, j++)
-        dest->str[i] = src->str[j];
+    memcpy(dest->str, src->str + start, (end - start));
 
     dest->size = substr_size;
     dest->str[dest->size] = '\0';
@@ -1039,23 +1118,20 @@ string_status_t string_format(string *dest, const char *format, ...)
     if (required < 0)
     {
         va_end(args);
-        
         return STRING_FORMAT_ERROR;
     }
     va_end(args);
 
-    printf("%d\n", required);
-
-    if (dest->size < required)
+    if (dest->size < (size_t) required)
     {
-        string_status_t status = string_reserve(dest, required);
+        string_status_t status = string_reserve(dest, (size_t) required);
 
         if (status != STRING_SUCCESS)
             return status;
     }
 
     va_start(args, format);
-    vsnprintf(dest->str, required, format, args);
+    vsnprintf(dest->str, (size_t) required, format, args);
     va_end(args);
 
     dest->str[required] = '\0';
@@ -1076,7 +1152,7 @@ string_iterator new_string_iter(const string *s)
     string_iterator iter = {
         .current = s && s->str ? s->str : NULL,
         .start = s && s->str ? s->str : NULL,
-        .end = s && s->str ? s->str + s->size: NULL
+        .end = s && s->str ? s->str + s->size - 1 : NULL
     };
 
     return iter;    
@@ -1107,10 +1183,10 @@ string_reverse_iterator new_string_reverse_iter(const string *s)
 
     string *s = new_string("Hello, world!", 0);
     string_iterator it = new_string_iter(&s);
-    
-    for (; it.current >= it.start; string_reverse_iter_next(&it))
+
+    for (; it.current < it.end; string_iter_next(&it))
     {
-        printf("%c", *string_get_curr_reverse_iter(&it));
+        printf("%c", *string_get_curr_iter(&it));
     }
 
 
@@ -1119,9 +1195,9 @@ string_reverse_iterator new_string_reverse_iter(const string *s)
     string *s = new_string("Hello, world!", 0);
     string_reverse_iterator it = new_string_reverse_iter(s);
     
-    for (; it.current < it.end; string_iter_next(&it))
+    for (; it.current >= it.start; string_reverse_iter_next(&it))
     {
-        printf("%c", *string_get_curr_iter(&it));
+        printf("%c", *string_get_curr_reverse_iter(&it));
     }
 
 */
@@ -1141,11 +1217,8 @@ bool string_iter_next(string_iterator *it)
     if (!it || !it->current || !it->end)
         return false;
 
-    if (it->current != it->end)
-    {
-        it->current++;
+    if (it->current++ < it->end)
         return true;
-    }
     
     return false;
 }
@@ -1165,10 +1238,13 @@ bool string_reverse_iter_next(string_reverse_iterator *it)
     if (!it || !it->current || !it->start)
         return false;
 
-    if (it->current-- < it->start)
-        return false;
+    if (it->current > it->start - 1)
+    {
+        it->current--;
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 /*

@@ -17,6 +17,18 @@ Funções que tipicamente aceitam `const char*` também possuem uma versão que 
 - Códigos de erro para gerenciar casos extremos com eficiência (e.g., argumentos null, erros de allocação).
 - API Consistente para ambos inputs `const char*` e struct `string`.
 
+## Iterators
+`c_string_lib` fornece iterators para simplificar a travessia e manipulação de strings. Eles permitem mover-se pelos caracteres de forma eficiente, sem a necessidade de gerenciar índices manualmente.
+
+### Recursos dos Iteradores
+
+- **Travessia Bidirecional**:
+  - `string_iterator` para travessia em direção direta.
+  - `string_reverse_iterator` para travessia em direção reversa.
+- **Segurança e Facilidade de Uso**:
+  - Lida automaticamente com strings null ou vazias.
+  - Garante que os iteradores não ultrapassem os limites.
+
 ## Clone Esse Repositório
 
 ```

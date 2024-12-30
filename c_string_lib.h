@@ -23,8 +23,8 @@ typedef enum {
     STRING_FORMAT_ERROR     = -5
 } string_status_t;
 
-char* string_to_char(string *s);
-string* char_to_string(char *s);
+char* string_to_char(const string *s);
+string* char_to_string(const char *s);
 
 string* new_string(const char *str, size_t capacity);
 string* new_string_s(const string *str, size_t capacity);

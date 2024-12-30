@@ -1172,7 +1172,7 @@ string_reverse_iterator new_string_reverse_iter(const string *s)
     string_reverse_iterator iter = {
         .current = s && s->str ? s->str + s->size - 1 : NULL,
         .start = s && s->str ? s->str : NULL,
-        .end = s && s->str ? s->str + s->size : NULL
+        .end = s && s->str ? s->str + s->size - 1 : NULL
     };
 
     return iter;
@@ -1182,11 +1182,11 @@ string_reverse_iterator new_string_reverse_iter(const string *s)
     - How to iterate with string_iterator:
 
     string *s = new_string("Hello, world!", 0);
-    string_iterator it = new_string_iter(&s);
+    string_iterator it = new_string_iter(s);
 
-    for (; it.current < it.end; string_iter_next(&it))
+    for (; it.current <= it.end; string_iter_next(&it))
     {
-        printf("%c", *string_get_curr_iter(&it));
+        printf("%c", string_get_curr_iter(&it));
     }
 
 
@@ -1197,7 +1197,7 @@ string_reverse_iterator new_string_reverse_iter(const string *s)
     
     for (; it.current >= it.start; string_reverse_iter_next(&it))
     {
-        printf("%c", *string_get_curr_reverse_iter(&it));
+        printf("%c", string_get_curr_reverse_iter(&it));
     }
 
 */
@@ -1238,11 +1238,8 @@ bool string_reverse_iter_next(string_reverse_iterator *it)
     if (!it || !it->current || !it->start)
         return false;
 
-    if (it->current > it->start - 1)
-    {
-        it->current--;
+    if (it->current-- > it->start)
         return true;
-    }
 
     return false;
 }
@@ -1257,12 +1254,12 @@ bool string_reverse_iter_next(string_reverse_iterator *it)
  * - `NULL`: if `it` or it's contents are NULL
  * - The current position of `it`
  */
-char* string_get_curr_iter(string_iterator *it)
+char string_get_curr_iter(string_iterator *it)
 {
     if (!it || !it->current || !it->end)
         return NULL;
 
-    return it->current;
+    return *it->current;
 }
 
 /*
@@ -1275,12 +1272,12 @@ char* string_get_curr_iter(string_iterator *it)
  * - `NULL`: if `it` or it's contents are NULL
  * - The current position of `it`
  */
-char* string_get_curr_reverse_iter(string_reverse_iterator *it)
+char string_get_curr_reverse_iter(string_reverse_iterator *it)
 {
     if (!it || !it->current || !it->start)
         return NULL;
 
-    return it->current;
+    return *it->current;
 }
 
 /*
